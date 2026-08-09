@@ -2,6 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TranslationService {
+  static const Map <String, String> languages = {
+    'en': 'English',
+    'ja': 'Japanese',
+    'zh': 'Chinese',
+    'ko': 'Korean',
+    'es': 'Spanish',
+    'fr': 'French',
+    'de': 'German',
+  };
+  
   Future<String> translate ({
     required String text,
     required String sourceLanguage,

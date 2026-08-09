@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_assistant_ai/services/translation_service.dart';
 import 'screens/translate_screen.dart';
 import 'screens/notes_screen.dart';
 void main() {
@@ -23,8 +24,16 @@ class GlobalAssistantApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+class _HomeScreenState extends State<HomeScreen> {
+ 
+ String _sourceLanguage = 'en';
+ String _targetLanguage = 'ja';
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +98,20 @@ class HomeScreen extends StatelessWidget {
                 //------------------------------------
                 //Language Card
                 //-------------------------------------
-                _LanguageCard(),
+                _LanguageCard(
+                  sourceLanguage: _sourceLanguage,
+                  targetLanguage: _targetLanguage,
+                  onSourceChanged: (value) {
+                    setState(() {
+                      _sourceLanguage = value;
+                    });
+                  },
+                  onTargetChanged: (value) {
+                    setState(() {
+                      _targetLanguage = value;
+                    });
+                  },
+                ),
 
                 const SizedBox(height: 20),
                 //-------------------------------------------------
@@ -105,7 +127,10 @@ class HomeScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const TranslateScreen()
+                        builder: (context) => TranslateScreen(
+                          sourceLanguage: _sourceLanguage,
+                          targetLanguage: _targetLanguage,
+                        )
                       )
                     );
                   },  
@@ -134,18 +159,8 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                //------------------------------------------------------------
-                //Export
-                //-------------------------------------------------------------
-                _FeatureCard(
-                  icon: Icons.cloud_upload_rounded,
-                  iconColor: const Color(0xFF28D7D0),
-                  title: 'Export & Share',
-                  subtitle: 'Export your notes or share them anywhere',
-                  onTap: () {
-                    //Export feature will appear
-                  },
-                ),
+               
+               
 
                 const SizedBox(height: 30),
 
@@ -174,6 +189,19 @@ class HomeScreen extends StatelessWidget {
 //========================================================
 
 class _LanguageCard extends StatelessWidget {
+  final String sourceLanguage;
+  final String targetLanguage;
+
+  final ValueChanged<String> onSourceChanged;
+  final ValueChanged<String> onTargetChanged;
+
+  const _LanguageCard({
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    required this.onSourceChanged,
+    required this.onTargetChanged,
+  });
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -215,8 +243,9 @@ class _LanguageCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             _LanguageSelector(
-              flag: 'us',
-              language: 'English',
+              languageCode: sourceLanguage,
+              language: TranslationService.languages[sourceLanguage] ?? 'Unknown',
+              onChanged: onSourceChanged,
             ),
 
             const SizedBox(height: 16),
@@ -232,8 +261,10 @@ class _LanguageCard extends StatelessWidget {
             const SizedBox(height: 10),
 
             _LanguageSelector(
-              flag: 'JP',
-              language: "Japanese",
+              languageCode: targetLanguage,
+              language: TranslationService.languages[targetLanguage] ?? 'Unknown',
+              onChanged: onTargetChanged,
+      
             ),
         ],
         ),
@@ -245,12 +276,15 @@ class _LanguageCard extends StatelessWidget {
 //Language Selector
 //=========================================================
 class _LanguageSelector extends StatelessWidget {
-  final String flag;
+  final String languageCode;
   final String language;
 
+  final ValueChanged<String> onChanged;
+
   const _LanguageSelector({
-    required this.flag,
+    required this.languageCode,
     required this.language,
+    required this.onChanged,
   });
 
   @override
@@ -259,7 +293,7 @@ class _LanguageSelector extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: 18,
-        vertical: 15,
+        vertical: 4,
         ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
@@ -268,33 +302,39 @@ class _LanguageSelector extends StatelessWidget {
             color: Colors.white.withOpacity(0.08),
             ),
         ),
-        child: Row(
-          children: [
-            Text(
-              flag,
-              style: const TextStyle(
-                fontSize: 25,
-              ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: languageCode,
+            isExpanded: true,
+
+            icon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Colors.white70,
             ),
 
-            const SizedBox(width: 12),
+            dropdownColor: const Color(0xFF182D52),
 
-            Expanded(
-              child: Text(
-                language,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+            items: TranslationService.languages.entries
+            .map(
+              (entry) => DropdownMenuItem<String>(
+                value: entry.key,
+                child: Text(
+                  entry.value, 
+                  style: const TextStyle(
+                    fontSize: 18, 
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-              ),
+            ).toList(),
 
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Colors.white70,
-              ),
-          ],
-          ),
+            onChanged: (value) {
+              if (value != null) {
+                onChanged(value);
+              }
+            }
+          )
+        )
     );
   }
 }

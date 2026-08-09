@@ -4,7 +4,14 @@ import '../services/translation_service.dart';
 import'../services/storage_service.dart';
 import 'notes_screen.dart';
 class TranslateScreen extends StatefulWidget {
-  const TranslateScreen ({super.key});
+  final String sourceLanguage;
+  final String targetLanguage;
+  
+  const TranslateScreen({
+    super.key,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    });
 
   @override
   State<TranslateScreen> createState() => _TranslateScreenState();
@@ -32,8 +39,8 @@ class _TranslateScreenState extends State<TranslateScreen> {
   String _recognizedText = '';
   String _translatedText = '';
 
-  String _sourceLanguage = 'en';
-  String _targetLanguage = 'ja';
+  late String _sourceLanguage;
+  late String _targetLanguage;
 
   final StorageService _storageService = StorageService();
   final Map<String, String> _languages = {
@@ -97,6 +104,10 @@ class _TranslateScreenState extends State<TranslateScreen> {
   @override
   void initState() {
     super.initState();
+
+    _sourceLanguage = widget.sourceLanguage;
+    _targetLanguage = widget.targetLanguage;
+    
     _initializeSpeech();
     }
 
