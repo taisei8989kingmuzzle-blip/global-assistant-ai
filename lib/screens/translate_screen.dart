@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../services/translation_service.dart';
-
+import'../services/storage_service.dart';
+import 'notes_screen.dart';
 class TranslateScreen extends StatefulWidget {
   const TranslateScreen ({super.key});
 
@@ -34,6 +35,7 @@ class _TranslateScreenState extends State<TranslateScreen> {
   String _sourceLanguage = 'en';
   String _targetLanguage = 'ja';
 
+  final StorageService _storageService = StorageService();
   final Map<String, String> _languages = {
     'en': 'English',
     'ja': 'Japanese',
@@ -71,26 +73,25 @@ class _TranslateScreenState extends State<TranslateScreen> {
     }
   }
   Future<void> _translateText(String text) async {
-    if (text.trim().isEmpty) {
-      return;
-    }
+   final translated = await _translationService.translate(
+    text: text,
+    sourceLanguage: _sourceLanguage,
+    targetLanguage: _targetLanguage,
+    );
 
-    try {
-      final translated = await _translationService.translate(
-        text: text,
-        sourceLanguage: _sourceLanguage,
-        targetLanguage: _targetLanguage,
-        );
+    setState(() {
+      _translatedText = translated;
+    });
 
-        if (!mounted) return;
+    debugPrint('Translation: #text -> $translated');
+    await _storageService.saveNote(
+      originalText: text,
+      translatedText: translated,
+      sourceLanguage: _sourceLanguage,
+      targetLanguage: _targetLanguage,
+    );
 
-        setState(() {
-          _translatedText = translated;
-        });
-
-    } catch (e) {
-      debugPrint('Translation error: $e');
-    }
+    debugPrint('Note Saved!');
   }
 
   @override

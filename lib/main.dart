@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/translate_screen.dart';
-
+import 'screens/notes_screen.dart';
 void main() {
   runApp(const GlobalAssistantApp());
 }
@@ -123,7 +123,12 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 
                     'View and manage your translated notes.',
                   onTap: () {
-                    //Notes screen will appear
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotesScreen(),
+                      )
+                    );
                   },
                 ),
 
